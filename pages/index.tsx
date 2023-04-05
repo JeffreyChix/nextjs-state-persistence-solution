@@ -1,4 +1,3 @@
-import { ChangeEvent, useEffect, useState } from "react";
 import Head from "next/head";
 import { GetStaticProps } from "next";
 import Link from "next/link";
@@ -6,28 +5,21 @@ import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 
 import { SearchBar } from "@/components/search";
+import { useLoadMore } from "@/hooks/useLoadMore";
 
 import bgImage from "@/assets/images/landscape.jpg";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home({ articles = [] }: { articles: any[] }) {
-  const [query, setQuery] = useState("");
-  const [filteredArticles, setFilteredArticles] = useState(articles);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
-    setQuery(e.target.value);
-
-  useEffect(() => {
-    if (query.length < 3) {
-      setFilteredArticles(articles);
-      return;
-    }
-    const results = articles.filter((article) =>
-      article.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredArticles(results);
-  }, [articles, query]);
+  const {
+    filteredArticles,
+    query,
+    handleChange,
+    total,
+    loadMore,
+    showLoadMoreButton,
+  } = useLoadMore(articles);
 
   return (
     <>
@@ -59,7 +51,7 @@ export default function Home({ articles = [] }: { articles: any[] }) {
           <div
             className={`mt-20 mb-4 inline-block p-2 rounded-md border border-gray-600 text-xl ${styles.code}`}
           >
-            codenameone Articles
+            codenameone Articles ({filteredArticles.length} of {total})
           </div>
           {filteredArticles.length < 1 && (
             <div className="text-center my-10 text-3xl">No articles found!</div>
@@ -80,6 +72,16 @@ export default function Home({ articles = [] }: { articles: any[] }) {
               </Link>
             ))}
           </div>
+          {showLoadMoreButton && (
+            <div className="text-center my-6">
+              <button
+                className="py-3 px-4 text-xl rounded-sm bg-white text-black hover:opacity-70"
+                onClick={loadMore}
+              >
+                Load More
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </>
